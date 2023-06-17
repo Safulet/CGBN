@@ -1,6 +1,6 @@
 ifdef GMP_HOME
-  INC := -I$(GMP_HOME)/include
-  LIB := -L$(GMP_HOME)/lib
+  INC := -I/root/ck.w/gmp-6.2.1/include
+  LIB := -L/root/ck.w/gmp-6.2.1/lib
 endif
 ifndef GMP_HOME
   INC :=
@@ -9,7 +9,11 @@ endif
 
 clean:
 	rm -f libcalc.so
+	rm -f main
 
 build: 
 	nvcc --ptxas-options=-v --compiler-options '-fPIC' $(INC) $(LIB) -I../include -arch=sm_75 -lgmp -Xcompiler -fopenmp -o libcalc.so --shared calc.cu
+
+build_go:
+	go build -o main main.go
 
