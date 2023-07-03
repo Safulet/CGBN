@@ -11,8 +11,8 @@ clean:
 	rm -f libcalc.so
 	rm -f main
 
-build: 
-	nvcc --ptxas-options=-v --compiler-options '-fPIC' $(INC) $(LIB) -I../include -arch=sm_75 -lgmp -Xcompiler -fopenmp -o libcalc.so --shared calc.cu
+build_cuda: 
+	nvcc --ptxas-options=-v --compiler-options '-fPIC' $(INC) $(LIB) -I../include -arch=sm_70 -lgmp -Xcompiler -fopenmp -o libcalc.so --shared calc.cu
 
 build_go:
 	go build -o main main.go

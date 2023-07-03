@@ -23,11 +23,22 @@
 
 // IMPORTANT:  DO NOT DEFINE TPI OR BITS BEFORE INCLUDING CGBN
 #define TPI 32
-#define BITS 4096
-#define window_bits 5
+#define BITS 2048
+#define window_bits 7
+
+class params_t {
+  public:
+    // parameters used by the CGBN context
+    static const uint32_t TPB=0;                     // get TPB from blockDim.x
+    static const uint32_t MAX_ROTATION=4;            // good default value
+    static const uint32_t SHM_LIMIT=0;               // no shared mem available
+    static const bool     CONSTANT_TIME=false;       // constant time implementations aren't available yet
+};
+
+typedef params_t params;
 
 // helpful typedefs for the kernel
-typedef cgbn_context_t<TPI>         context_t;
+typedef cgbn_context_t<TPI, params>         context_t;
 typedef cgbn_env_t<context_t, BITS> env_t;
 
 uint32_t Instances=10;
