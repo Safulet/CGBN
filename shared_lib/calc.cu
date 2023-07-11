@@ -23,7 +23,7 @@
 
 // IMPORTANT:  DO NOT DEFINE TPI OR BITS BEFORE INCLUDING CGBN
 #define TPI 32
-#define BITS 2048
+#define BITS 4096
 #define window_bits 7
 
 class params_t {
@@ -426,6 +426,42 @@ extern "C" void powm_sliding_window(int size) {
 	cudaFree(gpuInstances);
 }
 
+extern "C" void powm_sliding_window_uma(int size) {
+	instance_t          *instances;
+	int32_t TPB = 128;
+	int32_t IPB = TPB / TPI;
+
+	Instances = size;
+	cudaMallocManaged((void **)&instances, sizeof(instance_t)*Instances);
+	generate_random_instances(instances, Instances);
+
+	kernel_powm_sliding_window<<<(Instances + IPB - 1)/IPB, TPB>>>(instances, Instances);
+	cudaDeviceSynchronize();
+	//verify_results(instances, Instances);
+
+	// clean up
+	cudaFree(instances);
+}
+
+
+extern "C" void powm_sliding_window_zc(int size) {
+	instance_t          *h_instances, *d_instances;
+	int32_t TPB = 128;
+	int32_t IPB = TPB / TPI;
+
+	Instances = size;
+	cudaHostAlloc((void **)&h_instances, sizeof(instance_t)*Instances, cudaHostAllocMapped);
+	cudaHostGetDevicePointer((void **)&d_instances, (void *)h_instances, 0);
+	generate_random_instances(h_instances, Instances);
+
+	kernel_powm_sliding_window<<<(Instances + IPB - 1)/IPB, TPB>>>(d_instances, Instances);
+	cudaDeviceSynchronize();
+	//verify_results(h_instances, Instances);
+
+	// clean up
+	cudaFree(d_instances);
+	cudaFreeHost(h_instances);
+}
 
 extern "C" void cgbn_power(int size) {
 	instance_t          *instances, *gpuInstances;
@@ -518,6 +554,26 @@ extern "C" void gmp_power(int size) {
 }
 
 int main() {
+	instance_t          *h_instances, *d_instances;
+	int32_t TPB = 128;
+	int32_t IPB = TPB / TPI;
+
+	//cudaSetDeviceFlags(cudaDeviceScheduleYield);
+	cudaSetDeviceFlags(cudaDeviceBlockingSync);
+	Instances = 1000000;
+	//Instances = 1;
+	cudaHostAlloc((void **)&h_instances, sizeof(instance_t)*Instances, cudaHostAllocMapped);
+	cudaHostGetDevicePointer((void **)&d_instances, (void *)h_instances, 0);
+	generate_random_instances(h_instances, Instances);
+
+	kernel_powm_sliding_window<<<(Instances + IPB - 1)/IPB, TPB>>>(d_instances, Instances);
+	cudaDeviceSynchronize();
+
+	// clean up
+	cudaFree(d_instances);
+	cudaFreeHost(h_instances);
+
+/*
 	instance_t          *instances, *gpuInstances;
 	cgbn_error_report_t *report;
 	uint64_t            startTime, endTime;
@@ -572,5 +628,6 @@ int main() {
 	CUDA_CHECK(cgbn_error_report_free(report));
 
 	printf("Performance test done ...\n");
+*/
 	return 0;
 }
