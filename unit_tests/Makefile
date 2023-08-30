@@ -1,17 +1,6 @@
-ifdef GMP_HOME
-  INC := -I$(GMP_HOME)/include
-  LIB := -L$(GMP_HOME)/lib
-endif
-ifndef GMP_HOME
-  INC :=
-  LIB :=
-endif
-ifdef GTEST_HOME
-  GTEST_DIR := $(GTEST_HOME)
-endif
-ifndef GTEST_HOME
-  GTEST_DIR := ../gtest
-endif
+INC := -I../../gmp/include
+LIB := -L../../gmp/lib
+GTEST_DIR := ../gtest
 
 pick:
 	@echo
